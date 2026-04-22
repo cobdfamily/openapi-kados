@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['access_5fdownload_5fonly_0',['ACCESS_DOWNLOAD_ONLY',['../classAdapter.html#a7200315ee1f625ddc791b1adf459dd64',1,'Adapter']]],
+  ['access_5fdownload_5fonly_5fautomatic_5fallowed_1',['ACCESS_DOWNLOAD_ONLY_AUTOMATIC_ALLOWED',['../classAdapter.html#ae237ff42ccf47189611716dbffb24405',1,'Adapter']]],
+  ['access_5frestricted_5fdownload_5fonly_2',['ACCESS_RESTRICTED_DOWNLOAD_ONLY',['../classAdapter.html#a9b58828a1e5fb391c224969e7bd09cf7',1,'Adapter']]],
+  ['access_5frestricted_5fdownload_5fonly_5fautomatic_5fallowed_3',['ACCESS_RESTRICTED_DOWNLOAD_ONLY_AUTOMATIC_ALLOWED',['../classAdapter.html#af57227d97a5a5b28e52dbbe6e321a8a5',1,'Adapter']]],
+  ['access_5fstream_5fand_5fdownload_4',['ACCESS_STREAM_AND_DOWNLOAD',['../classAdapter.html#a115fbbac44f1b66efa26eaab8d37390e',1,'Adapter']]],
+  ['access_5fstream_5fand_5fdownload_5fautomatic_5fallowed_5',['ACCESS_STREAM_AND_DOWNLOAD_AUTOMATIC_ALLOWED',['../classAdapter.html#ac14f077aa0a01bf5900832667d5a9cba',1,'Adapter']]],
+  ['access_5fstream_5fand_5frestricted_5fdownload_6',['ACCESS_STREAM_AND_RESTRICTED_DOWNLOAD',['../classAdapter.html#a468305f82545c23910448a48bb000af0',1,'Adapter']]],
+  ['access_5fstream_5fand_5frestricted_5fdownload_5fautomatic_5fallowed_7',['ACCESS_STREAM_AND_RESTRICTED_DOWNLOAD_AUTOMATIC_ALLOWED',['../classAdapter.html#ac07299010ff2d192778e46082ccbc2a6',1,'Adapter']]],
+  ['access_5fstream_5fonly_8',['ACCESS_STREAM_ONLY',['../classAdapter.html#a0cfb7454da60ccb9cefcd769eed5cc63',1,'Adapter']]],
+  ['adapter_9',['Adapter',['../classAdapter.html',1,'']]],
+  ['adapterexception_10',['AdapterException',['../classAdapterException.html',1,'']]],
+  ['announcementexists_11',['announcementExists',['../classAdapter.html#a8f32d8492bfba680690dff28dd8a6ee6',1,'Adapter\announcementExists()'],['../classKobraAdapter.html#a26797a52890f2184fc964809196dcf92',1,'KobraAdapter\announcementExists()']]],
+  ['announcementinfo_12',['announcementInfo',['../classAdapter.html#a94c3e110034a8a7276288173dc065a8f',1,'Adapter\announcementInfo()'],['../classKobraAdapter.html#a1d102ccdbb3a3a9dee5cdf7d51a90b46',1,'KobraAdapter\announcementInfo()']]],
+  ['announcementread_13',['announcementRead',['../classAdapter.html#a5b13d43cff9c53139db45836f8dd6a53',1,'Adapter\announcementRead()'],['../classKobraAdapter.html#a112ca1050acf79e6cbe7e64a664c9cb1',1,'KobraAdapter\announcementRead()']]],
+  ['announcements_14',['announcements',['../classAdapter.html#a79839dfb9213b07ddc4264d35e9af7c8',1,'Adapter\announcements()'],['../classKobraAdapter.html#a51a8be72ee0f9effe68969674ffa909d',1,'KobraAdapter\announcements()']]],
+  ['authenticate_15',['authenticate',['../classAdapter.html#a6d946d47e8332d2a8c5ebf0c3caed003',1,'Adapter\authenticate()'],['../classKobraAdapter.html#a002e9dbde5a11b758ba22394108c54ad',1,'KobraAdapter\authenticate()']]]
+];

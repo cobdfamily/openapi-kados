@@ -1,0 +1,31 @@
+services:
+  kados:
+    image: kolibreorg/kados:latest
+    container_name: openapi-kados
+    ports:
+      - "${KADOS_HTTP_PORT:-8080}:80"
+    environment:
+      # Required: domain root of the OpenAPI backend. The adapter
+      # appends /protocols/kados/v1/methods/<methodName>/ to this.
+      OPENAPI_BASE_URL: "${OPENAPI_BASE_URL:?OPENAPI_BASE_URL must be set}"
+
+      # Optional: app-level credential, sent as X-API-Key on every
+      # outbound request.
+      OPENAPI_API_KEY: "${OPENAPI_API_KEY:-}"
+
+      # KADOS logging verbosity. One of DEBUG, INFO, WARNING,
+      # ERROR, FATAL.
+      KADOS_LOG_LEVEL: "${KADOS_LOG_LEVEL:-INFO}"
+
+      # Select the adapter by name; this overrides whatever the
+      # image ships in its default service.ini.
+      KADOS_ADAPTER_NAME: "OpenAPIAdapter"
+    volumes:
+      # Drop the adapter class into the image's adapter directory
+      # so DaisyOnlineService::setupAdapter() can load it.
+      - ./services/kados/includes/adapters/OpenAPIAdapter.class.php:/var/www/include/adapter/OpenAPIAdapter.class.php:ro
+
+      # Override the image's service.ini with an OpenAPI-flavored
+      # one. Belt-and-braces with KADOS_ADAPTER_NAME above.
+      - ./services/kados/config/service.openapi.ini:/var/www/service.ini:ro
+    restart: unless-stopped
