@@ -1,6 +1,6 @@
 services:
   kados:
-    image: kolibreorg/kados:latest
+    image: kolibreorg/kados:v2-latest
     container_name: openapi-kados
     ports:
       - "${KADOS_HTTP_PORT:-8080}:80"
