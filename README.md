@@ -79,39 +79,64 @@ explicitly; the constructor argument wins.
 
 ## Quick start
 
-From the repo root:
+The default compose stack stands up KADOS plus a
+hummingbird backend pulled from the cobdfamily
+registry, ready to talk out of the box:
+
+    docker compose up
+
+This pulls
+`kibble.apps.blindhub.ca/cobdfamily/hummingbird:latest`,
+brings it up with `testuser` / `testpass` credentials,
+and then starts KADOS once hummingbird's healthcheck
+passes. KADOS is reachable at
+<http://localhost:8080/service.php> (WSDL at
+<http://localhost:8080/service.php?wsdl>); hummingbird
+is reachable directly at <http://localhost:8001/> for
+test-harness assertions.
+
+To point KADOS at an external OpenAPI backend instead,
+override `OPENAPI_BASE_URL` and bring up just the
+KADOS service:
 
     export OPENAPI_BASE_URL=https://library.example.org
     export OPENAPI_API_KEY=sk_live_xxx   # optional
-    docker compose up
+    docker compose up -d kados
 
-KADOS will be reachable at
-<http://localhost:8080/service.php>. The WSDL is at
-<http://localhost:8080/service.php?wsdl>.
-
-Override the host port with `KADOS_HTTP_PORT`.
+Override host ports with `KADOS_HTTP_PORT` (default
+8080) and `HUMMINGBIRD_HTTP_PORT` (default 8001).
 
 ## Testing
 
 A Python test harness in
-[`services/kados/tests/`][tests] drives a DODP v2
-`logOn` against the running container. It ships with
-a stdlib HTTP mock of the OpenAPI backend so the
-whole stack can be exercised offline.
+[`services/kados/tests/`][tests] drives DODP v2
+operations against the running container. There are
+two test files:
+
+- `test_logon.py` --- backend-agnostic SOAP `logOn`
+  tests (WSDL, valid creds, invalid creds). Works
+  against any OpenAPI backend.
+- `test_hummingbird_backend.py` --- exercises the
+  default kados+hummingbird stack end-to-end, hitting
+  hummingbird directly for liveness + the adapter
+  wire contract, then a full SOAP `logOn` round-trip
+  through KADOS into hummingbird. Auto-skips when
+  hummingbird isn't reachable.
+
+Default flow:
 
     pip install -r services/kados/tests/requirements.txt
-    python3 services/kados/tests/mock_backend.py &
-    OPENAPI_BASE_URL=http://host.docker.internal:5555 \
-        docker compose up -d
-    python3 -m unittest services/kados/tests/test_logon.py
+    docker compose up -d
+    python3 -m unittest discover services/kados/tests
 
-See the [tests README][tests] for the Linux-host
-variant and how to point the harness at a real
-backend.
+For fully offline runs, a stdlib `mock_backend.py`
+ships with the harness; see the [tests README][tests]
+for that flow plus the Linux-host `host.docker.internal`
+note.
 
 ## Repo layout
 
-    docker-compose.yaml          runs kolibreorg/kados, mounts overrides
+    docker-compose.yaml          kados + hummingbird (kibble :latest)
     .gitignore
     services/
       kados/
@@ -126,8 +151,9 @@ backend.
           html/                  doxygen-rendered adapter API docs
         tests/
           README.md              how to run the harness
-          mock_backend.py
-          test_logon.py
+          mock_backend.py        offline backend mock
+          test_logon.py          backend-agnostic SOAP tests
+          test_hummingbird_backend.py
           requirements.txt
 
 ## DODP specifications
