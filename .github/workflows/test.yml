@@ -11,6 +11,15 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # Nightly run catches "hummingbird:latest just regressed our wire
+  # contract" within a day, instead of waiting for the next push to
+  # this repo (which can be weeks). 06:00 UTC is off-peak for the
+  # GitHub-hosted runner pool.
+  schedule:
+    - cron: "0 6 * * *"
+  # Manual trigger for "I just published a new hummingbird, prove
+  # the integration still works before I find out the hard way."
+  workflow_dispatch:
 
 jobs:
   integration:
