@@ -1,0 +1,80 @@
+name: test
+
+# Boots the docker-compose stack (kados + hummingbird from
+# kibble.apps.blindhub.ca) and runs the integration suite at
+# services/kados/tests/. The kibble registry speaks plain HTTP,
+# so the runner's docker daemon is reconfigured with kibble as
+# an insecure-registry before pulling.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: configure docker for plain-HTTP kibble registry
+        run: |
+          # The fleet's release workflows publish to
+          # kibble.apps.blindhub.ca over plain HTTP (anonymous
+          # push). The runner's docker daemon defaults to
+          # HTTPS-only; flag kibble as insecure so `compose pull`
+          # works.
+          sudo mkdir -p /etc/docker
+          echo '{"insecure-registries":["kibble.apps.blindhub.ca"]}' \
+            | sudo tee /etc/docker/daemon.json >/dev/null
+          sudo systemctl restart docker
+          # Wait for the daemon to come back.
+          for i in $(seq 1 30); do
+            docker info >/dev/null 2>&1 && break
+            sleep 1
+          done
+
+      - name: pull compose images
+        run: docker compose pull
+
+      - name: bring up stack
+        run: docker compose up -d
+
+      - name: install python test deps
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r services/kados/tests/requirements.txt
+
+      - name: wait for hummingbird healthcheck
+        run: |
+          # docker compose's depends_on / service_healthy already
+          # gates kados, but the host-side test harness hits
+          # hummingbird on 127.0.0.1:8001 and kados on
+          # 127.0.0.1:8080 directly, so wait for both ports here
+          # before running the tests.
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8001/ >/dev/null 2>&1 \
+            && curl -fsS http://127.0.0.1:8080/service.php?wsdl >/dev/null 2>&1; then
+              echo "stack ready"; exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::stack failed to come up in 120s"
+          docker compose ps
+          docker compose logs --tail=80
+          exit 1
+
+      - name: run integration tests
+        run: |
+          cd services/kados/tests
+          python3 -m unittest discover -v
+
+      - name: dump logs on failure
+        if: failure()
+        run: docker compose logs --tail=200
+
+      - name: tear down
+        if: always()
+        run: docker compose down -v

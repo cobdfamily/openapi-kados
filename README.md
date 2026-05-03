@@ -1,5 +1,7 @@
 # openapi-kados
 
+[![test](https://github.com/cobdfamily/openapi-kados/actions/workflows/test.yml/badge.svg)](https://github.com/cobdfamily/openapi-kados/actions/workflows/test.yml)
+
 An OpenAPI-backed adapter for [Kolibre-KADOS][kados]
 and a Docker Compose setup that runs the upstream
 `kolibreorg/kados` image against an HTTP library
