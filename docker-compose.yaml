@@ -1,12 +1,6 @@
 services:
   hummingbird:
     image: kibble.apps.blindhub.ca/cobdfamily/hummingbird:latest
-    # The fleet's release workflows publish single-arch (amd64)
-    # images on purpose — production hosts are all amd64 and
-    # multi-arch builds noticeably slow CI. Pinning the platform
-    # here lets apple-silicon dev hosts run the stack via Docker
-    # Desktop's Rosetta translation layer.
-    platform: linux/amd64
     container_name: openapi-kados-hummingbird
     ports:
       # Bind to localhost only — KADOS reaches hummingbird via the
