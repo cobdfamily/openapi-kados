@@ -115,14 +115,42 @@ class HummingbirdBackendTests(unittest.TestCase):
     def test_hummingbird_kados_contentListExists_directly(self):
         """Skip the SOAP layer for one assertion that proves the
         adapter's wire contract is actually what hummingbird
-        speaks: POST kados envelope to /protocols/kados/v1/
-        and expect the canonical {"data": <bool>} response."""
+        speaks: authenticate, then POST kados envelope to
+        /protocols/kados/v1/methods/contentListExists/ with the
+        session token and expect the canonical
+        {"data": <bool>} response.
+
+        hummingbird's KADOS router (v0.7+) gates session-scoped
+        methods on Authorization: Session; ``contentListExists``
+        is one of those. The adapter handles this transparently
+        for the SOAP layer (see OpenAPIAdapter::authenticate),
+        but here we drive the contract by hand."""
+        auth_url = (
+            HUMMINGBIRD_BASE_URL
+            + "/protocols/kados/v1/methods/authenticate/"
+        )
+        auth_body = {
+            "method": "authenticate",
+            "data": {
+                "username": USERNAME,
+                "password": PASSWORD,
+            },
+        }
+        auth_r = requests.post(auth_url, json=auth_body, timeout=5)
+        self.assertEqual(auth_r.status_code, 200, msg=auth_r.text[:500])
+        token = auth_r.json()["data"]["sessionToken"]
+
         url = (
             HUMMINGBIRD_BASE_URL
             + "/protocols/kados/v1/methods/contentListExists/"
         )
         body = {"method": "contentListExists", "data": {"list": "bookshelf"}}
-        r = requests.post(url, json=body, timeout=5)
+        r = requests.post(
+            url,
+            json=body,
+            headers={"Authorization": f"Session {token}"},
+            timeout=5,
+        )
         self.assertEqual(r.status_code, 200, msg=r.text[:500])
         self.assertEqual(r.json(), {"data": True})
 

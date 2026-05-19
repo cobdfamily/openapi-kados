@@ -213,11 +213,36 @@ class OpenAPIAdapter extends Adapter
 
     public function startSession()
     {
+        // Anonymous on hummingbird's side -- safe to call before
+        // authenticate(). The session lifecycle on the OpenAPI
+        // side is owned by ``authenticate`` (which mints the
+        // sessionToken); ``startSession`` here is a no-op-shaped
+        // RPC hook the KADOS framework invokes on every request
+        // and which hummingbird returns ``{"data": true}`` for
+        // regardless of auth state.
         return $this->callAPI('startSession', array());
     }
 
     public function stopSession()
     {
+        // KADOS's DaisyOnlineService.sessionHandle() calls
+        // sessionDestroy() (and so this method) at the *start*
+        // of every SOAP request, before the new logOn handshake
+        // runs. On a fresh PHP process there is no prior token,
+        // and hummingbird's v0.7+ KADOS router requires
+        // Authorization: Session for session-scoped methods --
+        // calling stopSession without a token returns 401, which
+        // an earlier version of this adapter let bubble up as an
+        // AdapterException, killing the SOAP envelope with a PHP
+        // fatal error before any of logOn's actual work ran.
+        //
+        // Guard: when we have no session, there is nothing to
+        // stop. Idempotency-correct and matches hummingbird's
+        // current contract.
+        if (empty($this->sessionToken))
+        {
+            return null;
+        }
         $result = $this->callAPI('stopSession', array());
         $this->sessionToken = null;
         return $result;
