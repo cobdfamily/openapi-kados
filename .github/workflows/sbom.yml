@@ -1,0 +1,64 @@
+name: sbom
+
+# CycloneDX 1.6 SBOM via syft against the upstream
+# kolibreorg/kados image.
+#
+# openapi-kados is unusual in the cobdfamily fleet:
+# it doesn't build its own Docker image. The runtime
+# is the upstream kolibreorg/kados:v2-latest image
+# from Docker Hub, with this repo's custom
+# OpenAPIAdapter PHP class bind-mounted in at run
+# time. So the dependency tree that matters for CVE
+# scanning is the upstream KADOS image's contents
+# (PHP version, SOAP library, OS packages from
+# Debian or similar), not anything in this repo's
+# git tree.
+#
+# We pull kolibreorg/kados:v2-latest and syft-scan
+# it. The SBOM captures the upstream image as it
+# exists today; if upstream ships a security update,
+# the next CI run picks up the new contents.
+#
+# Note: the custom OpenAPIAdapter.class.php is NOT
+# in the scanned image (it's bind-mounted at runtime
+# by docker-compose). It's a single PHP file with no
+# composer deps, so the SBOM coverage gap is small
+# enough to live with. If the adapter grows
+# composer deps later, switch this workflow to a
+# build-then-scan that layers the adapter into the
+# image before syft.
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: pull upstream kados image
+        run: docker pull kolibreorg/kados:v2-latest
+      - name: generate CycloneDX SBOM with syft
+        uses: anchore/sbom-action@v0
+        with:
+          image: kolibreorg/kados:v2-latest
+          format: cyclonedx-json
+          output-file: bom.cdx.json
+      - name: validate SBOM has components
+        run: |
+          components=$(jq '.components | length' bom.cdx.json)
+          echo "SBOM contains $components components"
+          if [ "$components" -lt 1 ]; then
+            echo "ERROR: SBOM is empty"
+            exit 1
+          fi
+      - name: upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.ref_name }}
+          path: bom.cdx.json
+          retention-days: 90
+          if-no-files-found: error
